@@ -491,7 +491,9 @@
               <option value="MT">Mountain (MT)</option>
               <option value="PT">Pacific (PT)</option>
               <option value="GMT">Greenwich Mean Time (GMT)</option>
+              <option value="BST">British Summer Time (BST)</option>
               <option value="CET">Central European Time (CET)</option>
+              <option value="CEST">Central European Summer Time (CEST)</option>
               <option value="__other">Other (write in)…</option>
             </select>
             <input type="text" id="hostTimezoneOther" placeholder="Enter your time zone" style="margin-top:8px;display:none;">
@@ -761,7 +763,8 @@
   // fixed-offset IANA equivalents (no DST ambiguity) for the named zone options
   const IANA_ZONES = {
     ET:"America/New_York", CT:"America/Chicago", MT:"America/Denver",
-    PT:"America/Los_Angeles", GMT:"Etc/GMT", CET:"Etc/GMT-1"
+    PT:"America/Los_Angeles", GMT:"Etc/GMT", BST:"Etc/GMT-1",
+    CET:"Etc/GMT-1", CEST:"Etc/GMT-2"
   };
 
   function getZonedEpochSeconds(y, m, d, h, mi, timeZone){
@@ -792,7 +795,9 @@
     }
     const date = formatDate(dateStr);
     const time = formatTime(timeStr);
-    return [date, time].filter(Boolean).join(" at ") || "TBD";
+    const otherZone = $("hostTimezoneOther").value.trim();
+    const timeWithZone = [time, otherZone].filter(Boolean).join(" ");
+    return [date, timeWithZone].filter(Boolean).join(" at ") || "TBD";
   }
 
   function val(id, fallback){
