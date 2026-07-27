@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gymcord League Rules Wizard</title>
+<style>
+  :root{
+    --bg:#0A0E14;
+    --surface:#1A1F2E;
+    --surface-2:#212736;
+    --border:#2A3142;
+    --text:#FFFFFF;
+    --text-secondary:#A0AEC0;
+    --text-tertiary:#6B7280;
+    --accent:#00D9FF;
+    --accent-dark:#00ACC1;
+    --accent-purple:#8B5CF6;
+    --success:#10B981;
+    --warning:#F59E0B;
+    --error:#EF4444;
+    --radius-sm:8px;
+    --radius-lg:20px;
+  }
+  :root[data-theme="light"]{
+    --bg:#F8F9FA;
+    --surface:#FFFFFF;
+    --surface-2:#F3F4F6;
+    --border:#E5E7EB;
+    --text:#1F2937;
+    --text-secondary:#6B7280;
+    --text-tertiary:#9CA3AF;
+    --accent:#00ACC1;
+    --accent-dark:#0891B2;
+    --accent-purple:#8B5CF6;
+    --success:#10B981;
+    --warning:#F59E0B;
+    --error:#EF4444;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;
+    transition:background-color .2s ease,color .2s ease;
+  }
+  a{color:var(--accent);}
+  .panel, input, select, textarea, .pill-toggle, .emoji-picker-btn, .emoji-picker-panel, .discord-frame{
+    transition:background-color .2s ease,color .2s ease,border-color .2s ease;
+  }
+
+  .hero{
+    background:linear-gradient(100deg,#c026d3 0%,#8b5cf6 35%,#64748b 55%,#22c55e 100%);
+    padding:28px 24px;
+  }
+  .hero-inner{
+    max-width:1200px;
+    margin:0 auto;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .theme-toggle{
+    margin-left:auto;
+    width:44px;height:44px;
+    border-radius:12px;
+    background:rgba(10,14,20,0.55);
+    border:1px solid rgba(255,255,255,0.25);
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;
+    cursor:pointer;
+    flex-shrink:0;
+    transition:background-color .2s ease,transform .1s ease;
+  }
+  .theme-toggle:hover{background:rgba(10,14,20,0.75);}
+  .theme-toggle:active{transform:scale(0.94);}
+  .hero-badge{
+    width:44px;height:44px;border-radius:12px;
+    background:rgba(10,14,20,0.55);
+    display:flex;align-items:center;justify-content:center;
+    font-size:22px;
+    flex-shrink:0;
+  }
+  .hero h1{
+    margin:0;
+    font-size:22px;
+    letter-spacing:.2px;
+    color:#fff;
+    text-shadow:0 1px 4px rgba(0,0,0,.35);
+  }
+  .hero p{
+    margin:2px 0 0;
+    color:rgba(255,255,255,.9);
+    font-size:14px;
+  }
+
+  .wrap{
+    max-width:1200px;
+    margin:0 auto;
+    padding:28px 24px 80px;
+  }
+
+  .wizard-grid{
+    display:grid;
+    grid-template-columns:minmax(340px,1fr) minmax(340px,460px);
+    gap:24px;
+    align-items:start;
+  }
+  @media (max-width:900px){
+    .wizard-grid{grid-template-columns:1fr;}
+  }
+
+  .panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    padding:22px;
+  }
+
+  .section{
+    margin-bottom:26px;
+  }
+  .section:last-child{margin-bottom:0;}
+  .section-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:15px;
+    font-weight:700;
+    color:var(--accent);
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    margin:0 0 14px;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--border);
+  }
+
+  .field{margin-bottom:16px;}
+  .field:last-child{margin-bottom:0;}
+  label{
+    display:block;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--text);
+    margin-bottom:6px;
+  }
+  .hint{
+    display:block;
+    font-size:12px;
+    color:var(--text-tertiary);
+    margin-top:4px;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  select,
+  textarea{
+    width:100%;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:var(--radius-sm);
+    padding:10px 12px;
+    font-size:14px;
+    font-family:inherit;
+    transition:border-color .15s ease;
+  }
+  input:focus,select:focus,textarea:focus{
+    outline:none;
+    border-color:var(--accent);
+  }
+  textarea{resize:vertical;min-height:70px;}
+
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator{
+    cursor:pointer;
+  }
+  :root:not([data-theme="light"]) input[type="date"]::-webkit-calendar-picker-indicator,
+  :root:not([data-theme="light"]) input[type="time"]::-webkit-calendar-picker-indicator{
+    filter:invert(1) brightness(1.5);
+  }
+
+  .row2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  .row3{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:12px;
+  }
+  @media (max-width:520px){
+    .row2,.row3{grid-template-columns:1fr;}
+  }
+
+  .pill-toggle{
+    display:inline-flex;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    padding:3px;
+    gap:2px;
+  }
+  .pill-toggle button{
+    border:none;
+    background:transparent;
+    color:var(--text-secondary);
+    padding:7px 16px;
+    border-radius:var(--radius-lg);
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background .15s ease,color .15s ease;
+  }
+  .pill-toggle button.active{
+    background:var(--accent);
+    color:#001217;
+  }
+  .pill-toggle button[data-value="No"].active{
+    background:var(--warning);
+    color:#2A1400;
+  }
+
+  .subgroup{
+    margin-top:14px;
+    padding:14px 14px 2px;
+    border-left:2px solid var(--accent-purple);
+    background:rgba(139,92,246,0.08);
+    border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  }
+  .subgroup.hidden{display:none;}
+
+  .emoji-input{
+    width:80px;
+    text-align:center;
+    font-size:20px;
+  }
+
+  .emoji-picker-wrap{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .emoji-picker-btn{
+    width:42px;
+    height:42px;
+    border-radius:var(--radius-sm);
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    font-size:19px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:border-color .15s ease;
+  }
+  .emoji-picker-btn:hover{border-color:var(--accent);}
+  .emoji-picker-panel{
+    position:absolute;
+    top:calc(100% + 8px);
+    left:0;
+    z-index:20;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    padding:10px;
+    box-shadow:0 12px 28px rgba(0,0,0,.45);
+  }
+  .emoji-picker-panel.hidden{display:none;}
+  .emoji-grid{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:4px;
+  }
+  .emoji-grid button{
+    width:34px;
+    height:34px;
+    border-radius:6px;
+    border:1px solid transparent;
+    background:transparent;
+    font-size:18px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+  }
+  .emoji-grid button:hover{
+    background:var(--surface);
+    border-color:var(--border);
+  }
+
+  .copy-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--accent);
+    color:#001217;
+    border:none;
+    border-radius:var(--radius-lg);
+    padding:10px 20px;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    transition:transform .1s ease,background .15s ease;
+  }
+  .copy-btn:hover{background:var(--accent-dark);}
+  .copy-btn:active{transform:scale(0.97);}
+  .copy-btn.copied{background:var(--success);color:#04231a;}
+
+  .preview-panel{
+    position:sticky;
+    top:24px;
+  }
+  @media (max-width:900px){
+    .preview-panel{position:static;}
+  }
+  .preview-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .preview-header h2{
+    margin:0;
+    font-size:15px;
+    color:var(--text);
+  }
+  .discord-frame{
+    background:#0d1017;
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    padding:16px;
+  }
+  #preview{
+    width:100%;
+    min-height:520px;
+    background:transparent;
+    border:none;
+    color:#dcddde;
+    font-family:"gg sans","Segoe UI",Helvetica,Arial,sans-serif;
+    font-size:14px;
+    white-space:pre-wrap;
+    resize:vertical;
+  }
+  #preview:focus{outline:none;}
+
+  footer{
+    max-width:1200px;
+    margin:0 auto;
+    padding:0 24px 40px;
+    color:var(--text-tertiary);
+    font-size:12.5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">🤸</div>
+    <div>
+      <h1>Gymcord League Rules Wizard</h1>
+      <p>Fill out your league rules once, get a ready-to-paste Discord announcement.</p>
+    </div>
+    <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">🌙</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="wizard-grid">
+
+    <!-- FORM -->
+    <div class="panel">
+
+      <div class="section">
+        <p class="section-title">🎨 League Basics</p>
+        <div class="field">
+          <label for="leagueName">League Name</label>
+          <input type="text" id="leagueName" placeholder="e.g. Theme Chaos, Rainbow League">
+        </div>
+        <div class="field">
+          <label for="hostName">Host Name</label>
+          <input type="text" id="hostName" placeholder="Your discord display or username">
+        </div>
+        <div class="field">
+          <label for="theme">Theme</label>
+          <input type="text" id="theme" placeholder="e.g. each round is a new theme">
+        </div>
+        <div class="field">
+          <label>Time Commitment</label>
+          <div class="pill-toggle" data-group="timeCommitment">
+            <button type="button" data-value="Low">Low</button>
+            <button type="button" data-value="Normal" class="active">Normal</button>
+            <button type="button" data-value="High">High</button>
+          </div>
+        </div>
+        <div class="field row2">
+          <div>
+            <label for="trackingPlatform">Where scores/rosters are tracked</label>
+            <select id="trackingPlatform">
+              <option value="Gymlytics">Gymlytics</option>
+              <option value="spreadsheet">Spreadsheet</option>
+              <option value="__other">Other…</option>
+            </select>
+            <input type="text" id="trackingPlatformOther" placeholder="Enter platform" style="margin-top:8px;display:none;">
+          </div>
+          <div>
+            <label for="commLocation">Where the league communicates</label>
+            <select id="commLocation">
+              <option value="Gymcord channel">Gymcord channel</option>
+              <option value="Discord DMs">Discord DMs</option>
+              <option value="Another server">Another server</option>
+              <option value="__other">Other…</option>
+            </select>
+            <input type="text" id="commLocationOther" placeholder="Enter location" style="margin-top:8px;display:none;">
+          </div>
+        </div>
+        <div class="field">
+          <label for="leagueDetails">League Details (your pitch to players)</label>
+          <textarea id="leagueDetails" placeholder="Sell your league! What makes it fun, competitive, or unique?"></textarea>
+        </div>
+      </div>
+
+      <div class="section">
+        <p class="section-title">📋 Draft Rules</p>
+
+        <div class="field">
+          <label>Recommended for beginners?</label>
+          <div class="pill-toggle" data-group="beginnerFriendly">
+            <button type="button" data-value="No" class="active">No</button>
+            <button type="button" data-value="Yes">Yes</button>
+          </div>
+        </div>
+
+        <div class="field row2">
+          <div>
+            <label for="draftSpeed">Draft Speed</label>
+            <select id="draftSpeed">
+              <option value="Slow">Slow</option>
+              <option value="Fast">Fast</option>
+            </select>
+          </div>
+          <div>
+            <label for="draftStyle">Draft Style</label>
+            <select id="draftStyle">
+              <option>Snake</option>
+              <option>Rotating</option>
+              <option>Wheelie</option>
+              <option>Fully automated on Gymlytics</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="turnTimeLimit">Draft Turn Time Limit</label>
+          <input type="text" id="turnTimeLimit" placeholder="e.g. 2 minutes">
+          <span class="hint">Auto-suggested from draft speed — edit anytime.</span>
+        </div>
+
+        <div class="field">
+          <label>Start Time</label>
+          <div class="pill-toggle" data-group="startMode">
+            <button type="button" data-value="specific" class="active">Specific date/time</button>
+            <button type="button" data-value="whenFull">When full</button>
+          </div>
+        </div>
+        <div class="field" id="specificTimeFields">
+          <div class="row2">
+            <div>
+              <label for="startDate">Date</label>
+              <input type="date" id="startDate">
+            </div>
+            <div>
+              <label for="startTimeInput">Time</label>
+              <input type="time" id="startTimeInput" step="1800">
+            </div>
+          </div>
+          <div style="margin-top:16px;">
+            <label for="hostTimezone">Host Time Zone</label>
+            <select id="hostTimezone">
+              <option value="ET">Eastern (ET)</option>
+              <option value="CT">Central (CT)</option>
+              <option value="MT">Mountain (MT)</option>
+              <option value="PT">Pacific (PT)</option>
+              <option value="GMT">Greenwich Mean Time (GMT)</option>
+              <option value="CET">Central European Time (CET)</option>
+              <option value="__other">Other (write in)…</option>
+            </select>
+            <input type="text" id="hostTimezoneOther" placeholder="Enter your time zone" style="margin-top:8px;display:none;">
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:16px;">
+          <label>Regular season trades in Gymlytics?</label>
+          <div class="pill-toggle" data-group="regularSeasonTrades">
+            <button type="button" data-value="No" class="active">No</button>
+            <button type="button" data-value="Yes">Yes</button>
+          </div>
+        </div>
+
+        <div class="subgroup" id="regularSeasonSubfields">
+          <div class="field">
+            <label>Pre-Gymlytics injury trades must be season ending (e.g. achilles, ACL, surgery)?</label>
+            <div class="pill-toggle" data-group="seasonEndingOnly">
+              <button type="button" data-value="No" class="active">No</button>
+              <button type="button" data-value="Yes">Yes</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:16px;">
+          <label>Preseason injury trades allowed?</label>
+          <div class="pill-toggle" data-group="injuryTradesAllowed">
+            <button type="button" data-value="No">No</button>
+            <button type="button" data-value="Yes" class="active">Yes</button>
+          </div>
+          <span class="hint">Recommended: Yes, with priority given to injury trades first in draft order.</span>
+        </div>
+
+        <div class="subgroup" id="injurySubfields">
+          <div class="field">
+            <label>Late roster adds can be traded in preseason injury trades?</label>
+            <div class="pill-toggle" data-group="lateRosterAdds">
+              <button type="button" data-value="No" class="active">No</button>
+              <button type="button" data-value="Yes">Yes</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Preseason injury trades as-it-happens (as soon as injury occurs) or just before season, in draft order?</label>
+            <div class="pill-toggle" data-group="injuryTradeTiming">
+              <button type="button" data-value="As-it-happens" class="active">As-it-happens</button>
+              <button type="button" data-value="Draft">Draft</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Host will manually make injury trades in Gymlytics between start of season and Gymlytics trading?</label>
+            <div class="pill-toggle" data-group="manualInjuryTrades">
+              <button type="button" data-value="No" class="active">No</button>
+              <button type="button" data-value="Yes">Yes</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:16px;">
+          <label for="otherTradeRules">Other draft and trade rules</label>
+          <textarea id="otherTradeRules" placeholder="e.g. No trades / Trade after week 3 / must be in-theme / late roster add policy…"></textarea>
+        </div>
+      </div>
+
+      <div class="section">
+        <p class="section-title">🤸 Team Format</p>
+        <div class="field">
+          <label for="rosterSize">Gymnasts per Team</label>
+          <input type="number" id="rosterSize" value="25" min="1">
+          <span class="hint">30 recommended if not doing trades</span>
+        </div>
+        <div class="field row2">
+          <div>
+            <label for="upCount">Up</label>
+            <input type="number" id="upCount" value="15" min="1">
+          </div>
+          <div>
+            <label for="countCount">Count</label>
+            <input type="number" id="countCount" value="5" min="1">
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <p class="section-title">👥 Join Info</p>
+        <div class="field row2">
+          <div>
+            <label for="maxPlayers">Max Players</label>
+            <input type="number" id="maxPlayers" value="8" min="1">
+            <span class="hint">Add 1 if you're not playing (bot react)</span>
+          </div>
+          <div>
+            <label for="joinEmoji">React Emoji</label>
+            <div class="emoji-picker-wrap">
+              <input type="text" id="joinEmoji" class="emoji-input" value="🙋" maxlength="8">
+              <button type="button" id="emojiPickerBtn" class="emoji-picker-btn" aria-label="Choose emoji">😀</button>
+              <div class="emoji-picker-panel hidden" id="emojiPickerPanel">
+                <div class="emoji-grid">
+                  <button type="button" data-emoji="🙋">🙋</button>
+                  <button type="button" data-emoji="🙋‍♀️">🙋‍♀️</button>
+                  <button type="button" data-emoji="🙋‍♂️">🙋‍♂️</button>
+                  <button type="button" data-emoji="✋">✋</button>
+                  <button type="button" data-emoji="👍">👍</button>
+                  <button type="button" data-emoji="🙌">🙌</button>
+                  <button type="button" data-emoji="👏">👏</button>
+                  <button type="button" data-emoji="✅">✅</button>
+                  <button type="button" data-emoji="🤸">🤸</button>
+                  <button type="button" data-emoji="🤸‍♀️">🤸‍♀️</button>
+                  <button type="button" data-emoji="🎀">🎀</button>
+                  <button type="button" data-emoji="🏅">🏅</button>
+                  <button type="button" data-emoji="🥇">🥇</button>
+                  <button type="button" data-emoji="⭐">⭐</button>
+                  <button type="button" data-emoji="🌟">🌟</button>
+                  <button type="button" data-emoji="💎">💎</button>
+                  <button type="button" data-emoji="🔥">🔥</button>
+                  <button type="button" data-emoji="💪">💪</button>
+                  <button type="button" data-emoji="🎉">🎉</button>
+                  <button type="button" data-emoji="🐐">🐐</button>
+                  <button type="button" data-emoji="🦄">🦄</button>
+                  <button type="button" data-emoji="👑">👑</button>
+                  <button type="button" data-emoji="💯">💯</button>
+                  <button type="button" data-emoji="🎯">🎯</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="panel preview-panel">
+      <div class="preview-header">
+        <h2>📣 Live Preview</h2>
+        <button class="copy-btn" id="copyBtn">📋 Copy to Clipboard</button>
+      </div>
+      <div class="discord-frame">
+        <textarea id="preview" readonly></textarea>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>Made with &lt;3 by Gymcord</footer>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+
+  // light/dark mode toggle
+  const themeToggle = $("themeToggle");
+  function applyTheme(theme){
+    document.documentElement.setAttribute("data-theme", theme);
+    themeToggle.textContent = theme === "light" ? "☀️" : "🌙";
+    localStorage.setItem("gymcordWizardTheme", theme);
+  }
+  const savedTheme = localStorage.getItem("gymcordWizardTheme")
+    || (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+  applyTheme(savedTheme);
+  themeToggle.addEventListener("click", ()=>{
+    const current = document.documentElement.getAttribute("data-theme");
+    applyTheme(current === "light" ? "dark" : "light");
+  });
+
+  // pill toggle groups
+  const toggleState = {
+    beginnerFriendly:"No", startMode:"specific", injuryTradesAllowed:"Yes", regularSeasonTrades:"No",
+    lateRosterAdds:"No", seasonEndingOnly:"No", injuryTradeTiming:"As-it-happens", manualInjuryTrades:"No",
+    timeCommitment:"Normal"
+  };
+  document.querySelectorAll(".pill-toggle").forEach(group=>{
+    const key = group.dataset.group;
+    group.querySelectorAll("button").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        group.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        toggleState[key] = btn.dataset.value;
+        onToggleChange(key);
+        render();
+      });
+    });
+  });
+
+  function onToggleChange(key){
+    if(key === "startMode"){
+      $("specificTimeFields").style.display = toggleState.startMode === "specific" ? "block" : "none";
+    }
+    if(key === "injuryTradesAllowed"){
+      $("injurySubfields").classList.toggle("hidden", toggleState.injuryTradesAllowed === "No");
+    }
+    if(key === "regularSeasonTrades"){
+      $("regularSeasonSubfields").classList.toggle("hidden", toggleState.regularSeasonTrades === "No");
+    }
+  }
+  onToggleChange("startMode");
+  onToggleChange("injuryTradesAllowed");
+  onToggleChange("regularSeasonTrades");
+
+  // "Other…" text reveals
+  function wireOther(selectId, otherId){
+    const sel = $(selectId), other = $(otherId);
+    sel.addEventListener("change", ()=>{
+      other.style.display = sel.value === "__other" ? "block" : "none";
+      render();
+    });
+  }
+  wireOther("trackingPlatform","trackingPlatformOther");
+  wireOther("commLocation","commLocationOther");
+  wireOther("hostTimezone","hostTimezoneOther");
+
+  // emoji picker
+  const emojiPanel = $("emojiPickerPanel");
+  $("emojiPickerBtn").addEventListener("click", (e)=>{
+    e.stopPropagation();
+    emojiPanel.classList.toggle("hidden");
+  });
+  emojiPanel.querySelectorAll("button[data-emoji]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      $("joinEmoji").value = btn.dataset.emoji;
+      emojiPanel.classList.add("hidden");
+      render();
+    });
+  });
+  document.addEventListener("click", (e)=>{
+    if(!emojiPanel.classList.contains("hidden") && !emojiPanel.contains(e.target) && e.target.id !== "emojiPickerBtn"){
+      emojiPanel.classList.add("hidden");
+    }
+  });
+
+  // auto-suggest turn time limit based on draft speed, unless user has typed their own value
+  let turnTimeTouched = false;
+  $("turnTimeLimit").addEventListener("input", ()=>{ turnTimeTouched = true; render(); });
+  $("draftSpeed").addEventListener("change", ()=>{
+    if(!turnTimeTouched){
+      $("turnTimeLimit").value = $("draftSpeed").value === "Fast" ? "2 minutes" : "14 hours";
+    }
+    render();
+  });
+  $("turnTimeLimit").value = "14 hours";
+
+  function selectOrOther(selectId, otherId){
+    const sel = $(selectId);
+    if(sel.value === "__other"){
+      const v = $(otherId).value.trim();
+      return v || "TBD";
+    }
+    return sel.value;
+  }
+
+  function formatDate(dateStr){
+    if(!dateStr) return "";
+    const [y,m,d] = dateStr.split("-").map(Number);
+    const dt = new Date(y, m-1, d);
+    return dt.toLocaleDateString("en-US", { month:"long", day:"numeric", year:"numeric" });
+  }
+  function formatTime(timeStr){
+    if(!timeStr) return "";
+    let [h,m] = timeStr.split(":").map(Number);
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12; if(h === 0) h = 12;
+    return `${h}:${String(m).padStart(2,"0")} ${ampm}`;
+  }
+
+  function buildStartTime(){
+    if(toggleState.startMode === "whenFull") return "When full";
+    const date = formatDate($("startDate").value);
+    const time = formatTime($("startTimeInput").value);
+    return [date, time].filter(Boolean).join(" at ") || "TBD";
+  }
+
+  function val(id, fallback){
+    const v = $(id).value.trim();
+    return v || (fallback !== undefined ? fallback : "TBD");
+  }
+
+  function render(){
+    const leagueName = val("leagueName","[League Name]");
+    const hostName = val("hostName","[Host Name]");
+    const theme = val("theme","TBD");
+    const timeCommitment = toggleState.timeCommitment;
+    const tracking = selectOrOther("trackingPlatform","trackingPlatformOther");
+    const comm = selectOrOther("commLocation","commLocationOther");
+    const leagueDetails = val("leagueDetails","Come join our league!");
+    const beginnerFriendly = toggleState.beginnerFriendly;
+    const draftSpeed = $("draftSpeed").value;
+    const draftStyle = $("draftStyle").value;
+    const turnTimeLimit = val("turnTimeLimit","TBD");
+    const startTime = buildStartTime();
+    const hostTz = selectOrOther("hostTimezone","hostTimezoneOther");
+    const injuryAllowed = toggleState.injuryTradesAllowed;
+
+    const na = injuryAllowed === "No";
+    const regularSeasonTrades = toggleState.regularSeasonTrades;
+    const seasonEndingOnly = regularSeasonTrades === "No" ? "NA" : toggleState.seasonEndingOnly;
+    const lateRosterAdds = na ? "NA" : toggleState.lateRosterAdds;
+    const injuryTradeTiming = na ? "NA" : toggleState.injuryTradeTiming;
+    const manualInjuryTrades = na ? "NA" : toggleState.manualInjuryTrades;
+    const otherTradeRules = val("otherTradeRules","None");
+
+    const rosterSize = val("rosterSize","25");
+    const up = val("upCount","15");
+    const count = val("countCount","5");
+    const maxPlayers = val("maxPlayers","8");
+    const joinEmoji = val("joinEmoji","🙋");
+
+    const text =
+`${leagueName} by ${hostName} |
+
+ 🎨 **Theme**: ${theme}
+⏱️ **Time Commitment**: ${timeCommitment}
+📍 **Location**: ${tracking}, ${comm}
+📜 **League Details**
+${leagueDetails}
+
+📋 **Draft Rules:**
+
+* **Recommended for beginners?** ${beginnerFriendly}
+* **Draft Type:** ${draftSpeed} ${draftStyle} Draft
+* **Draft Turn Time Limit:** ${turnTimeLimit}
+* **Start Time:** ${startTime}
+* **Time Zone of Host:** ${hostTz}
+* **Regular season trades in Gymlytics?** ${regularSeasonTrades}
+* **Pre-Gymlytics injury trades must be season ending e.g. achilles, ACL, surgery?** ${seasonEndingOnly}
+* **Preseason injury trades allowed?** ${injuryAllowed}
+* **Late roster adds can be traded in preseason injury trades?**  ${lateRosterAdds}
+* **Preseason injury trades as-it-happens (as soon as injury occurs) or just before season, in draft order?** ${injuryTradeTiming}
+* **Host will manually make injury trades in Gymlytics between start of season and Gymlytics trading?**  ${manualInjuryTrades}
+* **Other draft and trade rules:** ${otherTradeRules}
+
+
+🤸 **Team Format:**
+
+* Gymnasts per Team: ${rosterSize}
+* ${up} up / ${count} count
+
+
+👥 **Max Players:** ${maxPlayers}
+✅ **How to Join:**
+ React with ${joinEmoji} to this message to join.
+
+💼 **As a courtesy to your host and other players:** Please only sign up for leagues for which you are personally available to draft for. Please limit your number of drafts in progress to 5 at a time so that other players can participate in fantasy drafting.`;
+
+    $("preview").value = text;
+  }
+
+  document.querySelectorAll("input, select, textarea").forEach(el=>{
+    el.addEventListener("input", render);
+    el.addEventListener("change", render);
+  });
+
+  function flashCopyBtn(label){
+    const btn = $("copyBtn");
+    const original = "📋 Copy to Clipboard";
+    btn.textContent = label;
+    btn.classList.add("copied");
+    setTimeout(()=>{ btn.textContent = original; btn.classList.remove("copied"); }, 1800);
+  }
+
+  function fallbackCopy(){
+    const preview = $("preview");
+    preview.removeAttribute("readonly");
+    preview.focus();
+    preview.select();
+    let ok = false;
+    try{ ok = document.execCommand("copy"); }catch(e){ ok = false; }
+    preview.setAttribute("readonly", "true");
+    if(ok){
+      flashCopyBtn("✅ Copied!");
+    }else{
+      preview.focus();
+      preview.select();
+      flashCopyBtn("⌘/Ctrl+C to copy");
+    }
+  }
+
+  $("copyBtn").addEventListener("click", ()=>{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText($("preview").value)
+        .then(()=> flashCopyBtn("✅ Copied!"))
+        .catch(fallbackCopy);
+    } else {
+      fallbackCopy();
+    }
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>
