@@ -403,6 +403,13 @@
             <button type="button" data-value="High">High</button>
           </div>
         </div>
+        <div class="field">
+          <label>Recommended for beginners?</label>
+          <div class="pill-toggle" data-group="beginnerFriendly">
+            <button type="button" data-value="No" class="active">No</button>
+            <button type="button" data-value="Yes">Yes</button>
+          </div>
+        </div>
         <div class="field row2">
           <div>
             <label for="trackingPlatform">Where scores/rosters are tracked</label>
@@ -432,14 +439,6 @@
 
       <div class="section">
         <p class="section-title">📋 Draft Rules</p>
-
-        <div class="field">
-          <label>Recommended for beginners?</label>
-          <div class="pill-toggle" data-group="beginnerFriendly">
-            <button type="button" data-value="No" class="active">No</button>
-            <button type="button" data-value="Yes">Yes</button>
-          </div>
-        </div>
 
         <div class="field row2">
           <div>
@@ -499,7 +498,9 @@
           </div>
         </div>
 
-        <div class="field" style="margin-top:16px;">
+        <p class="section-title" style="margin-top:24px;">🔁 Trade Rules</p>
+
+        <div class="field">
           <label>Regular season trades in Gymlytics?</label>
           <div class="pill-toggle" data-group="regularSeasonTrades">
             <button type="button" data-value="No" class="active">No</button>
@@ -803,32 +804,31 @@
 `${leagueName} by ${hostName} |
 
  🎨 **Theme**: ${theme}
-⏱️ **Time Commitment**: ${timeCommitment}
 📍 **Location**: ${tracking}, ${comm}
-📜 **League Details**
+📜 **League Details:**
 ${leagueDetails}
 
-📋 **Draft Rules:**
+⏱️ **Time Commitment**: ${timeCommitment}
+🔰 **Recommended for beginners?** ${beginnerFriendly}
 
-* **Recommended for beginners?** ${beginnerFriendly}
+### 📋 **Draft Rules:**
 * **Draft Type:** ${draftSpeed} ${draftStyle} Draft
 * **Draft Turn Time Limit:** ${turnTimeLimit}
 * **Start Time:** ${startTime}
 * **Time Zone of Host:** ${hostTz}
-* **Regular season trades in Gymlytics?** ${regularSeasonTrades}
-* **Pre-Gymlytics injury trades must be season ending e.g. achilles, ACL, surgery?** ${seasonEndingOnly}
-* **Preseason injury trades allowed?** ${injuryAllowed}
-* **Late roster adds can be traded in preseason injury trades?**  ${lateRosterAdds}
-* **Preseason injury trades as-it-happens (as soon as injury occurs) or just before season, in draft order?** ${injuryTradeTiming}
-* **Host will manually make injury trades in Gymlytics between start of season and Gymlytics trading?**  ${manualInjuryTrades}
-* **Other draft and trade rules:** ${otherTradeRules}
 
+### 🔁 **Trade Rules:**
+Regular season trades in Gymlytics? **${regularSeasonTrades}**
+Pre-Gymlytics injury trades must be season ending e.g. achilles, ACL, surgery? **${seasonEndingOnly}**
+Preseason injury trades allowed? **${injuryAllowed}**
+Late roster adds can be traded in preseason injury trades? **${lateRosterAdds}**
+Preseason injury trades as-it-happens (as soon as injury occurs) or just before season, in draft order? **${injuryTradeTiming}**
+Host will manually make injury trades in Gymlytics between start of season and Gymlytics trading? **${manualInjuryTrades}**
+Other draft and trade rules: **${otherTradeRules}**
 
-🤸 **Team Format:**
-
-* Gymnasts per Team: ${rosterSize}
-* ${up} up / ${count} count
-
+### 🤸 **Team Format:**
+Gymnasts per Team: ${rosterSize}
+${up} up / ${count} count
 
 👥 **Max Players:** ${maxPlayers}
 ✅ **How to Join:**
