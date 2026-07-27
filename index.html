@@ -389,7 +389,7 @@
         </div>
         <div class="field">
           <label for="hostName">Host Name</label>
-          <input type="text" id="hostName" placeholder="Your discord display or username">
+          <input type="text" id="hostName" placeholder="Your Gymcord display or username">
         </div>
         <div class="field">
           <label for="theme">Theme</label>
@@ -758,10 +758,40 @@
     return `${h}:${String(m).padStart(2,"0")} ${ampm}`;
   }
 
+  // fixed-offset IANA equivalents (no DST ambiguity) for the named zone options
+  const IANA_ZONES = {
+    ET:"America/New_York", CT:"America/Chicago", MT:"America/Denver",
+    PT:"America/Los_Angeles", GMT:"Etc/GMT", CET:"Etc/GMT-1"
+  };
+
+  function getZonedEpochSeconds(y, m, d, h, mi, timeZone){
+    const asUTC = Date.UTC(y, m-1, d, h, mi);
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone, hour12:false,
+      year:"numeric", month:"2-digit", day:"2-digit",
+      hour:"2-digit", minute:"2-digit", second:"2-digit"
+    }).formatToParts(new Date(asUTC));
+    const get = type => Number(parts.find(p=>p.type===type).value);
+    const asIfUTC = Date.UTC(get("year"), get("month")-1, get("day"), get("hour")%24, get("minute"), get("second"));
+    const offsetMs = asIfUTC - asUTC;
+    return Math.round((asUTC - offsetMs) / 1000);
+  }
+
   function buildStartTime(){
     if(toggleState.startMode === "whenFull") return "When full";
-    const date = formatDate($("startDate").value);
-    const time = formatTime($("startTimeInput").value);
+    const dateStr = $("startDate").value;
+    const timeStr = $("startTimeInput").value;
+    if(!dateStr || !timeStr) return "TBD";
+    const tzCode = $("hostTimezone").value;
+    const ianaZone = IANA_ZONES[tzCode];
+    if(ianaZone){
+      const [y,m,d] = dateStr.split("-").map(Number);
+      const [h,mi] = timeStr.split(":").map(Number);
+      const epoch = getZonedEpochSeconds(y, m, d, h, mi, ianaZone);
+      return `<t:${epoch}:F> (<t:${epoch}:R>)`;
+    }
+    const date = formatDate(dateStr);
+    const time = formatTime(timeStr);
     return [date, time].filter(Boolean).join(" at ") || "TBD";
   }
 
@@ -794,6 +824,16 @@
     const manualInjuryTrades = na ? "NA" : toggleState.manualInjuryTrades;
     const otherTradeRules = val("otherTradeRules","None");
 
+    const tradeRuleLines = [
+      `Regular season trades in Gymlytics? **${regularSeasonTrades}**`,
+      seasonEndingOnly !== "NA" ? `Pre-Gymlytics injury trades must be season ending e.g. achilles, ACL, surgery? **${seasonEndingOnly}**` : null,
+      `Preseason injury trades allowed? **${injuryAllowed}**`,
+      lateRosterAdds !== "NA" ? `Late roster adds can be traded in preseason injury trades? **${lateRosterAdds}**` : null,
+      injuryTradeTiming !== "NA" ? `Preseason injury trades as-it-happens (as soon as injury occurs) or just before season, in draft order? **${injuryTradeTiming}**` : null,
+      manualInjuryTrades !== "NA" ? `Host will manually make injury trades in Gymlytics between start of season and Gymlytics trading? **${manualInjuryTrades}**` : null,
+      `Other draft and trade rules: **${otherTradeRules}**`
+    ].filter(Boolean).join("\n");
+
     const rosterSize = val("rosterSize","25");
     const up = val("upCount","15");
     const count = val("countCount","5");
@@ -805,8 +845,7 @@
 
  🎨 **Theme**: ${theme}
 📍 **Location**: ${tracking}, ${comm}
-📜 **League Details:**
-${leagueDetails}
+📜 **League Details:** ${leagueDetails}
 
 ⏱️ **Time Commitment**: ${timeCommitment}
 🔰 **Recommended for beginners?** ${beginnerFriendly}
@@ -818,13 +857,7 @@ ${leagueDetails}
 * **Time Zone of Host:** ${hostTz}
 
 ### 🔁 **Trade Rules:**
-Regular season trades in Gymlytics? **${regularSeasonTrades}**
-Pre-Gymlytics injury trades must be season ending e.g. achilles, ACL, surgery? **${seasonEndingOnly}**
-Preseason injury trades allowed? **${injuryAllowed}**
-Late roster adds can be traded in preseason injury trades? **${lateRosterAdds}**
-Preseason injury trades as-it-happens (as soon as injury occurs) or just before season, in draft order? **${injuryTradeTiming}**
-Host will manually make injury trades in Gymlytics between start of season and Gymlytics trading? **${manualInjuryTrades}**
-Other draft and trade rules: **${otherTradeRules}**
+${tradeRuleLines}
 
 ### 🤸 **Team Format:**
 Gymnasts per Team: ${rosterSize}
