@@ -198,6 +198,21 @@
     .row2,.row3{grid-template-columns:1fr;}
   }
 
+  .time-select-group{
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .time-select-group select{
+    width:auto;
+    flex:1;
+    min-width:0;
+  }
+  .time-select-group span{
+    color:var(--text-tertiary);
+    font-weight:600;
+  }
+
   .pill-toggle{
     display:inline-flex;
     background:var(--surface-2);
@@ -440,65 +455,98 @@
       <div class="section">
         <p class="section-title">📋 Draft Rules</p>
 
-        <div class="field row2">
+        <div class="field row2" id="draftFormatRow">
           <div>
+            <label for="draftStyle">Draft Style</label>
+            <select id="draftStyle">
+              <option title="Pick order: 1,2,3,4,4,3,2,1 (reverses each round)">Snake</option>
+              <option title="Pick order: 1,2,3,4,2,3,4,1 (rotates by one each round)">Rotating</option>
+              <option>Wheelie</option>
+              <option>Gymlytics Autodraft</option>
+            </select>
+          </div>
+          <div id="draftSpeedField">
             <label for="draftSpeed">Draft Speed</label>
             <select id="draftSpeed">
               <option value="Slow">Slow</option>
               <option value="Fast">Fast</option>
-            </select>
-          </div>
-          <div>
-            <label for="draftStyle">Draft Style</label>
-            <select id="draftStyle">
-              <option>Snake</option>
-              <option>Rotating</option>
-              <option>Wheelie</option>
-              <option>Fully automated on Gymlytics</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="turnTimeLimit">Draft Turn Time Limit</label>
-          <input type="text" id="turnTimeLimit" placeholder="e.g. 2 minutes">
-          <span class="hint">Auto-suggested from draft speed — edit anytime.</span>
-        </div>
-
-        <div class="field">
-          <label>Start Time</label>
-          <div class="pill-toggle" data-group="startMode">
-            <button type="button" data-value="specific" class="active">Specific date/time</button>
-            <button type="button" data-value="whenFull">When full</button>
-          </div>
-        </div>
-        <div class="field" id="specificTimeFields">
-          <div>
-            <label for="hostTimezone">Host Time Zone</label>
-            <select id="hostTimezone">
-              <option value="ET">Eastern (ET)</option>
-              <option value="CT">Central (CT)</option>
-              <option value="MT">Mountain (MT)</option>
-              <option value="PT">Pacific (PT)</option>
-              <option value="GMT">Greenwich Mean Time (GMT)</option>
-              <option value="BST">British Summer Time (BST)</option>
-              <option value="CET">Central European Time (CET)</option>
-              <option value="CEST">Central European Summer Time (CEST)</option>
               <option value="__other">Other (write in)…</option>
             </select>
-            <input type="text" id="hostTimezoneOther" placeholder="Enter your time zone" style="margin-top:8px;display:none;">
+            <input type="text" id="draftSpeedOther" placeholder="Enter draft speed" style="margin-top:8px;display:none;">
           </div>
-          <div class="row2" style="margin-top:16px;">
-            <div>
-              <label for="startDate">League Start Date</label>
-              <input type="date" id="startDate">
+        </div>
+
+        <div class="field" id="turnTimeLimitField">
+          <label for="turnTimeLimit">Draft Turn Time Limit</label>
+          <input type="text" id="turnTimeLimit" placeholder="e.g. 2 minutes">
+        </div>
+
+        <div id="startTimeGroup">
+          <div class="field">
+            <label>Start Time</label>
+            <div class="pill-toggle" data-group="startMode">
+              <button type="button" data-value="specific" class="active">Specific date/time</button>
+              <button type="button" data-value="whenFull">When full</button>
             </div>
+          </div>
+          <div class="field" id="specificTimeFields">
             <div>
-              <label for="startTimeInput">League Start Time</label>
-              <input type="time" id="startTimeInput" step="1800">
+              <label for="hostTimezone">Host Time Zone</label>
+              <select id="hostTimezone">
+                <option value="ET">Eastern (ET)</option>
+                <option value="CT">Central (CT)</option>
+                <option value="MT">Mountain (MT)</option>
+                <option value="PT">Pacific (PT)</option>
+                <option value="GMT">Greenwich Mean Time (GMT)</option>
+                <option value="BST">British Summer Time (BST)</option>
+                <option value="CET">Central European Time (CET)</option>
+                <option value="CEST">Central European Summer Time (CEST)</option>
+                <option value="__other">Other (write in)…</option>
+              </select>
+              <input type="text" id="hostTimezoneOther" placeholder="Enter your time zone" style="margin-top:8px;display:none;">
+            </div>
+            <div class="row2" style="margin-top:16px;">
+              <div>
+                <label for="startDate">League Start Date</label>
+                <input type="date" id="startDate">
+              </div>
+              <div>
+                <label for="startTimeHour">League Start Time</label>
+                <div class="time-select-group">
+                  <select id="startTimeHour" aria-label="Hour">
+                    <option value="">--</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7" selected>7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                  </select>
+                  <span>:</span>
+                  <select id="startTimeMinute" aria-label="Minute">
+                    <option value="">--</option>
+                    <option value="00" selected>00</option>
+                    <option value="15">15</option>
+                    <option value="30">30</option>
+                    <option value="45">45</option>
+                  </select>
+                  <select id="startTimeAmPm" aria-label="AM or PM">
+                    <option value="">--</option>
+                    <option value="AM">AM</option>
+                    <option value="PM" selected>PM</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+        <p class="hint" id="autodraftStartTimeNote" style="display:none;">Start Time isn't needed since Gymlytics Autodraft runs automatically.</p>
 
         <p class="section-title" style="margin-top:24px;">🔁 Trade Rules</p>
 
@@ -513,7 +561,7 @@
 
         <div class="subgroup" id="injurySubfields">
           <div class="field">
-            <label>Preseason injury trades as-it-happens (as soon as injury occurs) or just before season, in draft order?</label>
+            <label>Preseason injury trades as-it-happens (as soon as injury occurs) or just before season as an injury trade draft?</label>
             <div class="pill-toggle" data-group="injuryTradeTiming">
               <button type="button" data-value="As-it-happens" class="active">As-it-happens</button>
               <button type="button" data-value="Draft">Draft</button>
@@ -537,20 +585,18 @@
         </div>
 
         <div class="field" style="margin-top:16px;">
-          <label>Regular season trades in Gymlytics?</label>
-          <div class="pill-toggle" data-group="regularSeasonTrades">
+          <label>Pre-Gymlytics injury trades must be season ending (e.g. achilles, ACL, surgery)?</label>
+          <div class="pill-toggle" data-group="seasonEndingOnly">
             <button type="button" data-value="No" class="active">No</button>
             <button type="button" data-value="Yes">Yes</button>
           </div>
         </div>
 
-        <div class="subgroup" id="regularSeasonSubfields">
-          <div class="field">
-            <label>Pre-Gymlytics injury trades must be season ending (e.g. achilles, ACL, surgery)?</label>
-            <div class="pill-toggle" data-group="seasonEndingOnly">
-              <button type="button" data-value="No" class="active">No</button>
-              <button type="button" data-value="Yes">Yes</button>
-            </div>
+        <div class="field" style="margin-top:16px;">
+          <label>Regular season trades in Gymlytics?</label>
+          <div class="pill-toggle" data-group="regularSeasonTrades">
+            <button type="button" data-value="No" class="active">No</button>
+            <button type="button" data-value="Yes">Yes</button>
           </div>
         </div>
 
@@ -688,13 +734,9 @@
     if(key === "injuryTradesAllowed"){
       $("injurySubfields").classList.toggle("hidden", toggleState.injuryTradesAllowed === "No");
     }
-    if(key === "regularSeasonTrades"){
-      $("regularSeasonSubfields").classList.toggle("hidden", toggleState.regularSeasonTrades === "No");
-    }
   }
   onToggleChange("startMode");
   onToggleChange("injuryTradesAllowed");
-  onToggleChange("regularSeasonTrades");
 
   // "Other…" text reveals
   function wireOther(selectId, otherId){
@@ -707,6 +749,14 @@
   wireOther("trackingPlatform","trackingPlatformOther");
   wireOther("commLocation","commLocationOther");
   wireOther("hostTimezone","hostTimezoneOther");
+  wireOther("draftSpeed","draftSpeedOther");
+
+  // open the native date picker on click, typing still works normally
+  $("startDate").addEventListener("click", function(){
+    if(typeof this.showPicker === "function"){
+      try{ this.showPicker(); }catch(e){}
+    }
+  });
 
   // emoji picker
   const emojiPanel = $("emojiPickerPanel");
@@ -781,10 +831,20 @@
     return Math.round((asUTC - offsetMs) / 1000);
   }
 
+  function getTimeStr24(){
+    const hour = $("startTimeHour").value;
+    const minute = $("startTimeMinute").value;
+    const ampm = $("startTimeAmPm").value;
+    if(!hour || !minute || !ampm) return "";
+    let h = Number(hour) % 12;
+    if(ampm === "PM") h += 12;
+    return `${String(h).padStart(2,"0")}:${minute}`;
+  }
+
   function buildStartTime(){
     if(toggleState.startMode === "whenFull") return "When full";
     const dateStr = $("startDate").value;
-    const timeStr = $("startTimeInput").value;
+    const timeStr = getTimeStr24();
     if(!dateStr || !timeStr) return "TBD";
     const tzCode = $("hostTimezone").value;
     const ianaZone = IANA_ZONES[tzCode];
@@ -815,28 +875,41 @@
     const comm = selectOrOther("commLocation","commLocationOther");
     const leagueDetails = val("leagueDetails","Come join our league!");
     const beginnerFriendly = toggleState.beginnerFriendly;
-    const draftSpeed = $("draftSpeed").value;
+    const draftSpeed = selectOrOther("draftSpeed","draftSpeedOther");
     const draftStyle = $("draftStyle").value;
+    const isAutodraft = draftStyle === "Gymlytics Autodraft";
+    $("startTimeGroup").style.display = isAutodraft ? "none" : "block";
+    $("autodraftStartTimeNote").style.display = isAutodraft ? "block" : "none";
+    $("draftSpeedField").style.display = isAutodraft ? "none" : "block";
+    $("draftFormatRow").style.gridTemplateColumns = isAutodraft ? "1fr" : "1fr 1fr";
+    $("turnTimeLimitField").style.display = isAutodraft ? "none" : "block";
     const turnTimeLimit = val("turnTimeLimit","TBD");
-    const startTime = buildStartTime();
-    const hostTz = selectOrOther("hostTimezone","hostTimezoneOther");
+    const startTime = isAutodraft ? null : buildStartTime();
+    const hostTz = isAutodraft ? null : selectOrOther("hostTimezone","hostTimezoneOther");
     const injuryAllowed = toggleState.injuryTradesAllowed;
 
     const na = injuryAllowed === "No";
     const regularSeasonTrades = toggleState.regularSeasonTrades;
-    const seasonEndingOnly = regularSeasonTrades === "No" ? "NA" : toggleState.seasonEndingOnly;
+    const seasonEndingOnly = toggleState.seasonEndingOnly;
     const lateRosterAdds = na ? "NA" : toggleState.lateRosterAdds;
     const injuryTradeTiming = na ? "NA" : toggleState.injuryTradeTiming;
     const manualInjuryTrades = toggleState.manualInjuryTrades;
     const otherTradeRules = val("otherTradeRules","None");
 
+    const draftRuleLines = [
+      isAutodraft ? `* **Draft Type:** ${draftStyle}` : `* **Draft Type:** ${draftSpeed} ${draftStyle} Draft`,
+      !isAutodraft ? `* **Draft Turn Time Limit:** ${turnTimeLimit}` : null,
+      !isAutodraft ? `* **Start Time:** ${startTime}` : null,
+      !isAutodraft ? `* **Time Zone of Host:** ${hostTz}` : null
+    ].filter(Boolean).join("\n");
+
     const tradeRuleLines = [
       `Preseason injury trades allowed? **${injuryAllowed}**`,
-      injuryTradeTiming !== "NA" ? `Preseason injury trades as-it-happens (as soon as injury occurs) or just before season, in draft order? **${injuryTradeTiming}**` : null,
+      injuryTradeTiming !== "NA" ? `Preseason injury trades as-it-happens (as soon as injury occurs) or just before season as an injury trade draft? **${injuryTradeTiming}**` : null,
       lateRosterAdds !== "NA" ? `Late roster adds can be picked up in preseason injury trades? **${lateRosterAdds}**` : null,
       `Trading allowed in between start of season and Gymlytics trading window? (Host does this manually in Gymlytics.) **${manualInjuryTrades}**`,
+      `Pre-Gymlytics injury trades must be season ending e.g. achilles, ACL, surgery? **${seasonEndingOnly}**`,
       `Regular season trades in Gymlytics? **${regularSeasonTrades}**`,
-      seasonEndingOnly !== "NA" ? `Pre-Gymlytics injury trades must be season ending e.g. achilles, ACL, surgery? **${seasonEndingOnly}**` : null,
       `Other draft and trade rules: **${otherTradeRules}**`
     ].filter(Boolean).join("\n");
 
@@ -857,10 +930,7 @@
 🔰 **Recommended for beginners?** ${beginnerFriendly}
 
 ### 📋 **Draft Rules:**
-* **Draft Type:** ${draftSpeed} ${draftStyle} Draft
-* **Draft Turn Time Limit:** ${turnTimeLimit}
-* **Start Time:** ${startTime}
-* **Time Zone of Host:** ${hostTz}
+${draftRuleLines}
 
 ### 🔁 **Trade Rules:**
 ${tradeRuleLines}
