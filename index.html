@@ -241,6 +241,30 @@
     color:#2A1400;
   }
 
+  .quick-pills{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .quick-pill{
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    color:var(--text-secondary);
+    padding:6px 14px;
+    border-radius:var(--radius-lg);
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background .15s ease,border-color .15s ease,color .15s ease;
+  }
+  .quick-pill:hover{border-color:var(--accent);}
+  .quick-pill.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#001217;
+  }
+
   .subgroup{
     margin-top:14px;
     padding:14px 14px 2px;
@@ -556,12 +580,11 @@
             <button type="button" data-value="No">No</button>
             <button type="button" data-value="Yes" class="active">Yes</button>
           </div>
-          <span class="hint">Recommended: Yes, with priority given to injury trades first in draft order.</span>
         </div>
 
         <div class="subgroup" id="injurySubfields">
           <div class="field">
-            <label>Preseason injury trades as-it-happens (as soon as injury occurs) or just before season as an injury trade draft?</label>
+            <label>Will players need to request and make preseason injury trades as soon as an athlete's injury occurs during preseason or will there be an injury trade draft just before season starts for all players who want to make injury trades?</label>
             <div class="pill-toggle" data-group="injuryTradeTiming">
               <button type="button" data-value="As-it-happens" class="active">As-it-happens</button>
               <button type="button" data-value="Draft">Draft</button>
@@ -577,14 +600,14 @@
         </div>
 
         <div class="field" style="margin-top:16px;">
-          <label>Trading allowed in between start of season and Gymlytics trading window? <span style="font-weight:400;color:var(--text-secondary);">(Host does this manually in Gymlytics.)</span></label>
+          <label>Injury trading allowed in between start of season and Gymlytics trading window? <span style="font-weight:400;color:var(--text-secondary);">(Host does this manually in Gymlytics.)</span></label>
           <div class="pill-toggle" data-group="manualInjuryTrades">
             <button type="button" data-value="No" class="active">No</button>
             <button type="button" data-value="Yes">Yes</button>
           </div>
         </div>
 
-        <div class="field" style="margin-top:16px;">
+        <div class="field" style="margin-top:16px;" id="seasonEndingOnlyField">
           <label>Pre-Gymlytics injury trades must be season ending (e.g. achilles, ACL, surgery)?</label>
           <div class="pill-toggle" data-group="seasonEndingOnly">
             <button type="button" data-value="No" class="active">No</button>
@@ -602,6 +625,11 @@
 
         <div class="field" style="margin-top:16px;">
           <label for="otherTradeRules">Other draft and trade rules</label>
+          <div class="quick-pills" id="otherTradeRulesPills">
+            <button type="button" class="quick-pill" data-snippet="Must show proof of season-ending injury">Must show proof of season-ending injury</button>
+            <button type="button" class="quick-pill" data-snippet="Host willing to make manual trades in between trading windows">Host willing to make manual trades in between trading windows</button>
+            <button type="button" class="quick-pill" data-snippet="Non-compete trading allowed in first 3 weeks">Non-compete trading allowed in first 3 weeks</button>
+          </div>
           <textarea id="otherTradeRules" placeholder="e.g. No trades / Trade after week 3 / must be in-theme / late roster add policy…"></textarea>
         </div>
       </div>
@@ -734,9 +762,14 @@
     if(key === "injuryTradesAllowed"){
       $("injurySubfields").classList.toggle("hidden", toggleState.injuryTradesAllowed === "No");
     }
+    if(key === "injuryTradesAllowed" || key === "manualInjuryTrades"){
+      const showSeasonEnding = toggleState.injuryTradesAllowed === "Yes" || toggleState.manualInjuryTrades === "Yes";
+      $("seasonEndingOnlyField").style.display = showSeasonEnding ? "block" : "none";
+    }
   }
   onToggleChange("startMode");
   onToggleChange("injuryTradesAllowed");
+  onToggleChange("manualInjuryTrades");
 
   // "Other…" text reveals
   function wireOther(selectId, otherId){
@@ -750,6 +783,27 @@
   wireOther("commLocation","commLocationOther");
   wireOther("hostTimezone","hostTimezoneOther");
   wireOther("draftSpeed","draftSpeedOther");
+
+  // quick-add pills for Other draft and trade rules
+  function refreshQuickPills(){
+    const lines = $("otherTradeRules").value.split("\n").map(l=>l.trim());
+    document.querySelectorAll(".quick-pill").forEach(btn=>{
+      btn.classList.toggle("active", lines.includes(btn.dataset.snippet));
+    });
+  }
+  document.querySelectorAll(".quick-pill").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const ta = $("otherTradeRules");
+      const lines = ta.value.split("\n").map(l=>l.trim()).filter(l=>l !== "");
+      const snippet = btn.dataset.snippet;
+      const idx = lines.indexOf(snippet);
+      if(idx >= 0){ lines.splice(idx, 1); } else { lines.push(snippet); }
+      ta.value = lines.join("\n");
+      refreshQuickPills();
+      render();
+    });
+  });
+  $("otherTradeRules").addEventListener("input", refreshQuickPills);
 
   // open the native date picker on click, typing still works normally
   $("startDate").addEventListener("click", function(){
@@ -890,25 +944,26 @@
 
     const na = injuryAllowed === "No";
     const regularSeasonTrades = toggleState.regularSeasonTrades;
-    const seasonEndingOnly = toggleState.seasonEndingOnly;
+    const seasonEndingOnly = (injuryAllowed === "Yes" || toggleState.manualInjuryTrades === "Yes") ? toggleState.seasonEndingOnly : "NA";
     const lateRosterAdds = na ? "NA" : toggleState.lateRosterAdds;
     const injuryTradeTiming = na ? "NA" : toggleState.injuryTradeTiming;
     const manualInjuryTrades = toggleState.manualInjuryTrades;
-    const otherTradeRules = val("otherTradeRules","None");
+    const otherTradeRulesLines = $("otherTradeRules").value.split("\n").map(l=>l.trim()).filter(l=>l !== "");
+    const otherTradeRules = otherTradeRulesLines.length ? otherTradeRulesLines.join(", ") : "None";
 
     const draftRuleLines = [
       isAutodraft ? `* **Draft Type:** ${draftStyle}` : `* **Draft Type:** ${draftSpeed} ${draftStyle} Draft`,
       !isAutodraft ? `* **Draft Turn Time Limit:** ${turnTimeLimit}` : null,
-      !isAutodraft ? `* **Start Time:** ${startTime}` : null,
-      !isAutodraft ? `* **Time Zone of Host:** ${hostTz}` : null
+      !isAutodraft ? `* **Time Zone of Host:** ${hostTz}` : null,
+      !isAutodraft ? `* **Start Time:** ${startTime}` : null
     ].filter(Boolean).join("\n");
 
     const tradeRuleLines = [
       `Preseason injury trades allowed? **${injuryAllowed}**`,
-      injuryTradeTiming !== "NA" ? `Preseason injury trades as-it-happens (as soon as injury occurs) or just before season as an injury trade draft? **${injuryTradeTiming}**` : null,
+      injuryTradeTiming !== "NA" ? `Will players need to request and make preseason injury trades as soon as an athlete's injury occurs during preseason or will there be an injury trade draft just before season starts for all players who want to make injury trades? **${injuryTradeTiming}**` : null,
       lateRosterAdds !== "NA" ? `Late roster adds can be picked up in preseason injury trades? **${lateRosterAdds}**` : null,
-      `Trading allowed in between start of season and Gymlytics trading window? (Host does this manually in Gymlytics.) **${manualInjuryTrades}**`,
-      `Pre-Gymlytics injury trades must be season ending e.g. achilles, ACL, surgery? **${seasonEndingOnly}**`,
+      `Injury trading allowed in between start of season and Gymlytics trading window? (Host does this manually in Gymlytics.) **${manualInjuryTrades}**`,
+      seasonEndingOnly !== "NA" ? `Pre-Gymlytics injury trades must be season ending e.g. achilles, ACL, surgery? **${seasonEndingOnly}**` : null,
       `Regular season trades in Gymlytics? **${regularSeasonTrades}**`,
       `Other draft and trade rules: **${otherTradeRules}**`
     ].filter(Boolean).join("\n");
@@ -923,11 +978,10 @@
 `${leagueName} by ${hostName} |
 
  🎨 **Theme**: ${theme}
-📍 **Location**: ${tracking}, ${comm}
-📜 **League Details:** ${leagueDetails}
-
 ⏱️ **Time Commitment**: ${timeCommitment}
 🔰 **Recommended for beginners?** ${beginnerFriendly}
+📍 **Location**: ${tracking}, ${comm}
+📜 **League Details:** ${leagueDetails}
 
 ### 📋 **Draft Rules:**
 ${draftRuleLines}
@@ -988,6 +1042,7 @@ ${up} up / ${count} count
     }
   });
 
+  refreshQuickPills();
   render();
 })();
 </script>
