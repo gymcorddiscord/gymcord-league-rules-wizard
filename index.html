@@ -485,9 +485,10 @@
             <select id="draftStyle">
               <option title="Pick order: 1,2,3,4,4,3,2,1 (reverses each round)">Snake</option>
               <option title="Pick order: 1,2,3,4,2,3,4,1 (rotates by one each round)">Rotating</option>
-              <option>Wheelie</option>
               <option>Gymlytics Autodraft</option>
+              <option value="__other">Other (write in)…</option>
             </select>
+            <input type="text" id="draftStyleOther" placeholder="Enter draft style" style="margin-top:8px;display:none;">
           </div>
           <div id="draftSpeedField">
             <label for="draftSpeed">Draft Speed</label>
@@ -783,6 +784,7 @@
   wireOther("commLocation","commLocationOther");
   wireOther("hostTimezone","hostTimezoneOther");
   wireOther("draftSpeed","draftSpeedOther");
+  wireOther("draftStyle","draftStyleOther");
 
   // quick-add pills for Other draft and trade rules
   function refreshQuickPills(){
@@ -930,7 +932,7 @@
     const leagueDetails = val("leagueDetails","Come join our league!");
     const beginnerFriendly = toggleState.beginnerFriendly;
     const draftSpeed = selectOrOther("draftSpeed","draftSpeedOther");
-    const draftStyle = $("draftStyle").value;
+    const draftStyle = selectOrOther("draftStyle","draftStyleOther");
     const isAutodraft = draftStyle === "Gymlytics Autodraft";
     $("startTimeGroup").style.display = isAutodraft ? "none" : "block";
     $("autodraftStartTimeNote").style.display = isAutodraft ? "block" : "none";
@@ -951,8 +953,14 @@
     const otherTradeRulesLines = $("otherTradeRules").value.split("\n").map(l=>l.trim()).filter(l=>l !== "");
     const otherTradeRules = otherTradeRulesLines.length ? otherTradeRulesLines.join(", ") : "None";
 
+    const draftTypeLine = isAutodraft
+      ? `* **Draft Type:** ${draftStyle}`
+      : /draft$/i.test(draftStyle.trim())
+        ? `* **Draft Type:** ${draftSpeed} ${draftStyle}`
+        : `* **Draft Type:** ${draftSpeed} ${draftStyle} Draft`;
+
     const draftRuleLines = [
-      isAutodraft ? `* **Draft Type:** ${draftStyle}` : `* **Draft Type:** ${draftSpeed} ${draftStyle} Draft`,
+      draftTypeLine,
       !isAutodraft ? `* **Draft Turn Time Limit:** ${turnTimeLimit}` : null,
       !isAutodraft ? `* **Time Zone of Host:** ${hostTz}` : null,
       !isAutodraft ? `* **Start Time:** ${startTime}` : null
