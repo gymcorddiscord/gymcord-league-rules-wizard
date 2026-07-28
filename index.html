@@ -473,17 +473,7 @@
           </div>
         </div>
         <div class="field" id="specificTimeFields">
-          <div class="row2">
-            <div>
-              <label for="startDate">Date</label>
-              <input type="date" id="startDate">
-            </div>
-            <div>
-              <label for="startTimeInput">Time</label>
-              <input type="time" id="startTimeInput" step="1800">
-            </div>
-          </div>
-          <div style="margin-top:16px;">
+          <div>
             <label for="hostTimezone">Host Time Zone</label>
             <select id="hostTimezone">
               <option value="ET">Eastern (ET)</option>
@@ -498,11 +488,55 @@
             </select>
             <input type="text" id="hostTimezoneOther" placeholder="Enter your time zone" style="margin-top:8px;display:none;">
           </div>
+          <div class="row2" style="margin-top:16px;">
+            <div>
+              <label for="startDate">League Start Date</label>
+              <input type="date" id="startDate">
+            </div>
+            <div>
+              <label for="startTimeInput">League Start Time</label>
+              <input type="time" id="startTimeInput" step="1800">
+            </div>
+          </div>
         </div>
 
         <p class="section-title" style="margin-top:24px;">🔁 Trade Rules</p>
 
         <div class="field">
+          <label>Preseason injury trades allowed?</label>
+          <div class="pill-toggle" data-group="injuryTradesAllowed">
+            <button type="button" data-value="No">No</button>
+            <button type="button" data-value="Yes" class="active">Yes</button>
+          </div>
+          <span class="hint">Recommended: Yes, with priority given to injury trades first in draft order.</span>
+        </div>
+
+        <div class="subgroup" id="injurySubfields">
+          <div class="field">
+            <label>Preseason injury trades as-it-happens (as soon as injury occurs) or just before season, in draft order?</label>
+            <div class="pill-toggle" data-group="injuryTradeTiming">
+              <button type="button" data-value="As-it-happens" class="active">As-it-happens</button>
+              <button type="button" data-value="Draft">Draft</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Late roster adds can be picked up in preseason injury trades?</label>
+            <div class="pill-toggle" data-group="lateRosterAdds">
+              <button type="button" data-value="No" class="active">No</button>
+              <button type="button" data-value="Yes">Yes</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:16px;">
+          <label>Trading allowed in between start of season and Gymlytics trading window? <span style="font-weight:400;color:var(--text-secondary);">(Host does this manually in Gymlytics.)</span></label>
+          <div class="pill-toggle" data-group="manualInjuryTrades">
+            <button type="button" data-value="No" class="active">No</button>
+            <button type="button" data-value="Yes">Yes</button>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:16px;">
           <label>Regular season trades in Gymlytics?</label>
           <div class="pill-toggle" data-group="regularSeasonTrades">
             <button type="button" data-value="No" class="active">No</button>
@@ -514,39 +548,6 @@
           <div class="field">
             <label>Pre-Gymlytics injury trades must be season ending (e.g. achilles, ACL, surgery)?</label>
             <div class="pill-toggle" data-group="seasonEndingOnly">
-              <button type="button" data-value="No" class="active">No</button>
-              <button type="button" data-value="Yes">Yes</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="field" style="margin-top:16px;">
-          <label>Preseason injury trades allowed?</label>
-          <div class="pill-toggle" data-group="injuryTradesAllowed">
-            <button type="button" data-value="No">No</button>
-            <button type="button" data-value="Yes" class="active">Yes</button>
-          </div>
-          <span class="hint">Recommended: Yes, with priority given to injury trades first in draft order.</span>
-        </div>
-
-        <div class="subgroup" id="injurySubfields">
-          <div class="field">
-            <label>Late roster adds can be traded in preseason injury trades?</label>
-            <div class="pill-toggle" data-group="lateRosterAdds">
-              <button type="button" data-value="No" class="active">No</button>
-              <button type="button" data-value="Yes">Yes</button>
-            </div>
-          </div>
-          <div class="field">
-            <label>Preseason injury trades as-it-happens (as soon as injury occurs) or just before season, in draft order?</label>
-            <div class="pill-toggle" data-group="injuryTradeTiming">
-              <button type="button" data-value="As-it-happens" class="active">As-it-happens</button>
-              <button type="button" data-value="Draft">Draft</button>
-            </div>
-          </div>
-          <div class="field">
-            <label>Host will manually make injury trades in Gymlytics between start of season and Gymlytics trading?</label>
-            <div class="pill-toggle" data-group="manualInjuryTrades">
               <button type="button" data-value="No" class="active">No</button>
               <button type="button" data-value="Yes">Yes</button>
             </div>
@@ -826,16 +827,16 @@
     const seasonEndingOnly = regularSeasonTrades === "No" ? "NA" : toggleState.seasonEndingOnly;
     const lateRosterAdds = na ? "NA" : toggleState.lateRosterAdds;
     const injuryTradeTiming = na ? "NA" : toggleState.injuryTradeTiming;
-    const manualInjuryTrades = na ? "NA" : toggleState.manualInjuryTrades;
+    const manualInjuryTrades = toggleState.manualInjuryTrades;
     const otherTradeRules = val("otherTradeRules","None");
 
     const tradeRuleLines = [
+      `Preseason injury trades allowed? **${injuryAllowed}**`,
+      injuryTradeTiming !== "NA" ? `Preseason injury trades as-it-happens (as soon as injury occurs) or just before season, in draft order? **${injuryTradeTiming}**` : null,
+      lateRosterAdds !== "NA" ? `Late roster adds can be picked up in preseason injury trades? **${lateRosterAdds}**` : null,
+      `Trading allowed in between start of season and Gymlytics trading window? (Host does this manually in Gymlytics.) **${manualInjuryTrades}**`,
       `Regular season trades in Gymlytics? **${regularSeasonTrades}**`,
       seasonEndingOnly !== "NA" ? `Pre-Gymlytics injury trades must be season ending e.g. achilles, ACL, surgery? **${seasonEndingOnly}**` : null,
-      `Preseason injury trades allowed? **${injuryAllowed}**`,
-      lateRosterAdds !== "NA" ? `Late roster adds can be traded in preseason injury trades? **${lateRosterAdds}**` : null,
-      injuryTradeTiming !== "NA" ? `Preseason injury trades as-it-happens (as soon as injury occurs) or just before season, in draft order? **${injuryTradeTiming}**` : null,
-      manualInjuryTrades !== "NA" ? `Host will manually make injury trades in Gymlytics between start of season and Gymlytics trading? **${manualInjuryTrades}**` : null,
       `Other draft and trade rules: **${otherTradeRules}**`
     ].filter(Boolean).join("\n");
 
