@@ -172,6 +172,16 @@
   }
   textarea{resize:vertical;min-height:70px;}
 
+  select{
+    appearance:none;
+    -webkit-appearance:none;
+    -moz-appearance:none;
+    padding-right:36px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23A0AEC0' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 14px center;
+  }
+
   input[type="date"]::-webkit-calendar-picker-indicator,
   input[type="time"]::-webkit-calendar-picker-indicator{
     cursor:pointer;
@@ -204,6 +214,8 @@
     width:auto;
     flex:1;
     min-width:0;
+    padding:10px 26px 10px 10px;
+    background-position:right 9px center;
   }
   .time-select-group span{
     color:var(--text-tertiary);
@@ -505,23 +517,23 @@
               <button type="button" data-value="whenFull">When full</button>
             </div>
           </div>
+          <div class="field">
+            <label for="hostTimezone">Host Time Zone</label>
+            <select id="hostTimezone">
+              <option value="ET">Eastern (ET)</option>
+              <option value="CT">Central (CT)</option>
+              <option value="MT">Mountain (MT)</option>
+              <option value="PT">Pacific (PT)</option>
+              <option value="GMT">Greenwich Mean Time (GMT)</option>
+              <option value="BST">British Summer Time (BST)</option>
+              <option value="CET">Central European Time (CET)</option>
+              <option value="CEST">Central European Summer Time (CEST)</option>
+              <option value="__other">Other (write in)…</option>
+            </select>
+            <input type="text" id="hostTimezoneOther" placeholder="Enter your time zone" style="margin-top:8px;display:none;">
+          </div>
           <div class="field" id="specificTimeFields">
-            <div>
-              <label for="hostTimezone">Host Time Zone</label>
-              <select id="hostTimezone">
-                <option value="ET">Eastern (ET)</option>
-                <option value="CT">Central (CT)</option>
-                <option value="MT">Mountain (MT)</option>
-                <option value="PT">Pacific (PT)</option>
-                <option value="GMT">Greenwich Mean Time (GMT)</option>
-                <option value="BST">British Summer Time (BST)</option>
-                <option value="CET">Central European Time (CET)</option>
-                <option value="CEST">Central European Summer Time (CEST)</option>
-                <option value="__other">Other (write in)…</option>
-              </select>
-              <input type="text" id="hostTimezoneOther" placeholder="Enter your time zone" style="margin-top:8px;display:none;">
-            </div>
-            <div class="row2" style="margin-top:16px;">
+            <div class="row2">
               <div>
                 <label for="startDate">League Start Date</label>
                 <input type="date" id="startDate">
@@ -576,14 +588,14 @@
 
         <div class="subgroup" id="injurySubfields">
           <div class="field">
-            <label>Will players need to request and make preseason injury trades as soon as an athlete's injury occurs during preseason or will there be an injury trade draft just before season starts for all players who want to make injury trades?</label>
+            <label>Preseason injury trades: immediate as injuries occur, or a single trade window before the season starts?</label>
             <div class="pill-toggle" data-group="injuryTradeTiming">
               <button type="button" data-value="As-it-happens" class="active">As-it-happens</button>
               <button type="button" data-value="Draft">Draft</button>
             </div>
           </div>
           <div class="field">
-            <label>Late roster adds can be picked up in preseason injury trades?</label>
+            <label>Can late roster adds be picked up via preseason injury trades?</label>
             <div class="pill-toggle" data-group="lateRosterAdds">
               <button type="button" data-value="No" class="active">No</button>
               <button type="button" data-value="Yes">Yes</button>
@@ -961,8 +973,8 @@
 
     const tradeRuleLines = [
       `Preseason injury trades allowed? **${injuryAllowed}**`,
-      injuryTradeTiming !== "NA" ? `Will players need to request and make preseason injury trades as soon as an athlete's injury occurs during preseason or will there be an injury trade draft just before season starts for all players who want to make injury trades? **${injuryTradeTiming}**` : null,
-      lateRosterAdds !== "NA" ? `Late roster adds can be picked up in preseason injury trades? **${lateRosterAdds}**` : null,
+      injuryTradeTiming !== "NA" ? `Preseason injury trades: immediate as injuries occur, or a single trade window before the season starts? **${injuryTradeTiming}**` : null,
+      lateRosterAdds !== "NA" ? `Can late roster adds be picked up via preseason injury trades? **${lateRosterAdds}**` : null,
       `Injury trading allowed in between start of season and Gymlytics trading window? (Host does this manually in Gymlytics.) **${manualInjuryTrades}**`,
       seasonEndingOnly !== "NA" ? `Pre-Gymlytics injury trades must be season ending e.g. achilles, ACL, surgery? **${seasonEndingOnly}**` : null,
       `Regular season trades in Gymlytics? **${regularSeasonTrades}**`,
