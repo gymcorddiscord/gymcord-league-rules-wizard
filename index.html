@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="vendor/ds-bundle.css">
 <style>
   :root{
     --bg:#0A0E14;
@@ -55,41 +56,20 @@
     transition:background-color .2s ease,color .2s ease,border-color .2s ease;
   }
 
-  .hero{
-    background:linear-gradient(100deg,#c026d3 0%,#8b5cf6 35%,#64748b 55%,#22c55e 100%);
-    padding:28px 24px;
-  }
-  .hero-inner{
+  .page-intro{
     max-width:1200px;
     margin:0 auto;
-    display:flex;
-    align-items:center;
-    gap:14px;
+    padding:28px 24px 0;
   }
-  .theme-toggle{
-    margin-left:auto;
-    width:44px;height:44px;
-    border-radius:12px;
-    background:rgba(10,14,20,0.55);
-    border:1px solid rgba(255,255,255,0.25);
-    display:flex;align-items:center;justify-content:center;
-    font-size:20px;
-    cursor:pointer;
-    flex-shrink:0;
-    transition:background-color .2s ease,transform .1s ease;
-  }
-  .theme-toggle:hover{background:rgba(10,14,20,0.75);}
-  .theme-toggle:active{transform:scale(0.94);}
-  .hero h1{
+  .page-intro h1{
     margin:0;
     font-size:22px;
     letter-spacing:.2px;
-    color:#fff;
-    text-shadow:0 1px 4px rgba(0,0,0,.35);
+    color:var(--text);
   }
-  .hero p{
-    margin:2px 0 0;
-    color:rgba(255,255,255,.9);
+  .page-intro p{
+    margin:6px 0 0;
+    color:var(--text-secondary);
     font-size:14px;
   }
 
@@ -361,6 +341,10 @@
   .copy-btn:hover{background:var(--accent-dark);}
   .copy-btn:active{transform:scale(0.97);}
   .copy-btn.copied{background:var(--success);color:#04231a;}
+  .copy-btn-icon{
+    display:inline-flex;
+    align-items:center;
+  }
 
   .preview-panel{
     position:sticky;
@@ -407,14 +391,11 @@
 </head>
 <body>
 
-<div class="hero">
-  <div class="hero-inner">
-    <div>
-      <h1>Gymcord League Rules Wizard</h1>
-      <p>Fill out your league rules once, get a ready-to-paste Discord announcement.</p>
-    </div>
-    <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">🌙</button>
-  </div>
+<div id="page-header"></div>
+
+<div class="page-intro">
+  <h1>Gymcord League Rules Wizard</h1>
+  <p>Fill out your league rules once, get a ready-to-paste Discord announcement.</p>
 </div>
 
 <div class="wrap">
@@ -709,7 +690,7 @@
     <div class="panel preview-panel">
       <div class="preview-header">
         <button class="copy-btn" id="copyBtn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          <span id="copyBtnIcon" class="copy-btn-icon"></span>
           <span id="copyBtnLabel">Copy to Clipboard</span>
         </button>
       </div>
@@ -721,26 +702,38 @@
   </div>
 </div>
 
-<footer>Made with &lt;3 by Gymcord &middot; v1.1 &middot; <a href="https://gymcorddiscord.github.io/gymcord-home/terms.html">Terms &amp; Privacy</a></footer>
+<footer>Made with &lt;3 by Gymcord &middot; v1.3 &middot; <a href="https://gymcorddiscord.github.io/gymcord-home/terms.html">Terms &amp; Privacy</a></footer>
 
+<script src="vendor/react.js"></script>
+<script src="vendor/react-dom.js"></script>
+<script src="vendor/ds-bundle.js"></script>
 <script>
 (function(){
   const $ = id => document.getElementById(id);
 
-  // light/dark mode toggle
-  const themeToggle = $("themeToggle");
+  // light/dark mode — persisted, drives both the page chrome and the AppHeader's toggle icon
   function applyTheme(theme){
     document.documentElement.setAttribute("data-theme", theme);
-    themeToggle.textContent = theme === "light" ? "☀️" : "🌙";
     localStorage.setItem("gymcordWizardTheme", theme);
   }
   const savedTheme = localStorage.getItem("gymcordWizardTheme")
     || (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
   applyTheme(savedTheme);
-  themeToggle.addEventListener("click", ()=>{
-    const current = document.documentElement.getAttribute("data-theme");
-    applyTheme(current === "light" ? "dark" : "light");
-  });
+
+  // mount the real AppHeader (phase="standard") from the Gymcord design system
+  (function(){
+    const h = React.createElement;
+    function PageHeader(){
+      const [theme, setTheme] = React.useState(savedTheme);
+      function handleThemeToggle(next){
+        setTheme(next);
+        applyTheme(next);
+      }
+      return h(window.GymcordDS.AppHeader, { phase:"standard", theme, onThemeToggle: handleThemeToggle });
+    }
+    ReactDOM.createRoot($("page-header")).render(h(PageHeader));
+    ReactDOM.createRoot($("copyBtnIcon")).render(h(window.GymcordDS.CopyIcon, { size:16 }));
+  })();
 
   // pill toggle groups
   const toggleState = {
